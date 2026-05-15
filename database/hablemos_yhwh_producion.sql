@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-05-2026 a las 17:13:41
+-- Tiempo de generación: 15-05-2026 a las 03:26:52
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -39,6 +39,7 @@ CREATE TABLE `dynamic_sections` (
   `nav_order` int(11) DEFAULT 0,
   `is_active` tinyint(1) DEFAULT 1,
   `show_in_navbar` tinyint(1) DEFAULT 1,
+  `data_table` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -47,10 +48,16 @@ CREATE TABLE `dynamic_sections` (
 -- Volcado de datos para la tabla `dynamic_sections`
 --
 
-INSERT INTO `dynamic_sections` (`id`, `title`, `slug`, `section_type`, `summary`, `content`, `icon`, `image_url`, `nav_order`, `is_active`, `show_in_navbar`, `created_at`, `updated_at`) VALUES
-(1, 'Hablemos de YHWH', 'hero', 'inline', 'Descubre las raíces hebreas de tu fe', 'Contenido descriptivo aquí...', 'bi-house', NULL, 0, 1, 1, '2026-02-24 12:08:30', '2026-02-24 12:08:30'),
-(2, 'Calendario Lunisolar', 'calendario', 'inline', 'Sigue los tiempos señalados', 'Información sobre el calendario...', 'bi-calendar3', NULL, 0, 1, 1, '2026-02-24 12:08:30', '2026-02-24 12:08:30'),
-(3, 'Sobre Nosotros', 'about', 'inline', 'Nuestra historia y valores', 'Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.', 'bi-info-circle', NULL, 0, 1, 1, '2026-02-24 12:08:30', '2026-02-24 12:08:30');
+INSERT INTO `dynamic_sections` (`id`, `title`, `slug`, `section_type`, `summary`, `content`, `icon`, `image_url`, `nav_order`, `is_active`, `show_in_navbar`, `data_table`, `created_at`, `updated_at`) VALUES
+(1, 'Hablemos de YHWH', 'hero', 'inline', 'Descubre las raíces hebreas de tu fe', 'Contenido descriptivo aquí...', 'bi-house', NULL, 0, 1, 1, 'home_section_hero', '2026-02-24 12:08:30', '2026-05-14 00:29:38'),
+(2, 'Calendario Lunisolar', 'calendario', 'inline', 'Sigue los tiempos señalados', 'Información sobre el calendario...', 'bi-calendar3', NULL, 0, 1, 1, 'home_section_calendario', '2026-02-24 12:08:30', '2026-05-14 00:29:38'),
+(3, 'Quiénes somos', 'quienes-somos', 'inline', 'En un mundo lleno de ruido, incertidumbre y búsquedas sin respuesta, nace un espacio dedicado a lo esencial: volver a la Palabra, al Nombre y a la Presencia del Eterno.\r\nHablemos de YHWH es un lugar para detenernos, respirar y reencontrarnos con la verdad que transforma, guía y sostiene. Aquí exploramos la Escritura con respeto, claridad y propósito, reconociendo que cada conversación sobre el Creador es un acto de acercamiento, un paso hacia la luz y la comprensión.\r\n\r\nEste proyecto surge del deseo profundo de compartir, aprender y crecer, no desde la imposición, sino desde la apertura y el diálogo. Porque hablar de YHWH es hablar de vida, de propósito y de identidad.', 'Somos una comunidad de buscadores, aprendices y servidores que anhelan conocer más al Eterno y caminar conforme a Su voluntad.\r\nNo somos una institución ni una denominación: somos un espacio de estudio, reflexión y encuentro, donde cada persona puede acercarse a la Escritura desde la autenticidad y el respeto.\r\n\r\nCreemos en una fe viva, consciente y fundamentada.\r\nCreemos en la importancia de volver a las raíces, al significado profundo del Nombre y a la esencia del mensaje divino.\r\nY creemos que cada conversación sincera sobre YHWH tiene el poder de despertar, sanar y transformar.', 'bi-info-circle', '', 0, 1, 1, NULL, '2026-02-24 12:08:30', '2026-05-14 23:39:25'),
+(5, 'Sobre Nosotros', 'about', 'inline', NULL, NULL, 'bi-file-text', NULL, 0, 1, 1, NULL, '2026-05-15 00:00:48', '2026-05-15 00:00:48'),
+(6, 'Parashot', 'parashot', 'inline', NULL, NULL, 'bi-file-text', NULL, 0, 1, 1, NULL, '2026-05-15 00:00:48', '2026-05-15 00:00:48'),
+(7, 'Testimonios', 'testimonio', 'inline', NULL, NULL, 'bi-file-text', NULL, 0, 1, 1, NULL, '2026-05-15 00:00:48', '2026-05-15 00:00:48'),
+(8, 'Equipo', 'equipo', 'inline', NULL, NULL, 'bi-file-text', NULL, 0, 1, 1, NULL, '2026-05-15 00:00:48', '2026-05-15 00:00:48'),
+(9, 'Contacto', 'contactos', 'inline', NULL, NULL, 'bi-file-text', NULL, 0, 1, 1, NULL, '2026-05-15 00:00:48', '2026-05-15 00:00:48'),
+(10, 'Footer', 'footer', 'inline', NULL, NULL, 'bi-file-text', NULL, 0, 1, 1, NULL, '2026-05-15 00:00:48', '2026-05-15 00:00:48');
 
 -- --------------------------------------------------------
 
@@ -71,22 +78,189 @@ CREATE TABLE `footer_links` (
 --
 
 INSERT INTO `footer_links` (`id`, `category`, `title`, `url`, `order_index`) VALUES
-(1, 'Enlaces ·tiles', 'Hogar', '/', 1),
-(2, 'Enlaces ·tiles', 'Sobre nosotros', '/#about', 2),
-(3, 'Enlaces ·tiles', 'Servicios', '/#services', 3),
-(4, 'Enlaces ·tiles', 'Condiciones de servicio', '#', 4),
-(5, 'Nuestros servicios', 'Dise±o web', '#', 1),
-(6, 'Nuestros servicios', 'Desarrollo web', '#', 2),
-(7, 'Nuestros servicios', 'Gesti¾n de productos', '#', 3),
-(8, 'Nuestros servicios', 'Marketing', '#', 4),
-(9, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
-(10, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
-(11, 'Recursos', 'Calendario', '/calendar', 1),
-(12, 'Recursos', 'Eventos', '/#portfolio', 2),
-(13, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
-(14, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
-(15, 'Recursos', 'Calendario', '/calendar', 1),
-(16, 'Recursos', 'Eventos', '/#portfolio', 2);
+(21, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(22, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(23, 'Recursos', 'Calendario', '/calendar', 1),
+(24, 'Recursos', 'Eventos', '/#portfolio', 2),
+(25, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(26, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(27, 'Recursos', 'Calendario', '/calendar', 1),
+(28, 'Recursos', 'Eventos', '/#portfolio', 2),
+(29, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(30, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(31, 'Recursos', 'Calendario', '/calendar', 1),
+(32, 'Recursos', 'Eventos', '/#portfolio', 2),
+(33, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(34, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(35, 'Recursos', 'Calendario', '/calendar', 1),
+(36, 'Recursos', 'Eventos', '/#portfolio', 2),
+(37, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(38, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(39, 'Recursos', 'Calendario', '/calendar', 1),
+(41, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(42, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(43, 'Recursos', 'Calendario', '/calendar', 1),
+(44, 'Recursos', 'Eventos', '/#portfolio', 2),
+(45, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(46, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(47, 'Recursos', 'Calendario', '/calendar', 1),
+(48, 'Recursos', 'Eventos', '/#portfolio', 2),
+(49, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(50, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(51, 'Recursos', 'Calendario', '/calendar', 1),
+(52, 'Recursos', 'Eventos', '/#portfolio', 2),
+(53, 'Enlaces Útiles', 'Sobre Nosotros', '/#about', 2),
+(54, 'Enlaces Útiles', 'Parashot', '/parashot', 3),
+(55, 'Recursos', 'Calendario', '/calendar', 1),
+(56, 'Recursos', 'Eventos', '/#portfolio', 2);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `home_section_about`
+--
+
+CREATE TABLE `home_section_about` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `home_section_about`
+--
+
+INSERT INTO `home_section_about` (`id`, `title`, `subtitle`, `content`, `image_url`, `updated_at`) VALUES
+(1, 'Quiénes somos', 'En un mundo lleno de ruido, incertidumbre y búsquedas sin respuesta, nace un espacio dedicado a lo esencial: volver a la Palabra, al Nombre y a la Presencia del Eterno. Hablemos de YHWH es un lugar para detenernos, respirar y reencontrarnos con la verdad que transforma, guía y sostiene. Aquí exploramos la Escritura con respeto, claridad y propósito, reconociendo que cada conversación sobre el Creador es un acto de acercamiento, un paso hacia la luz y la comprensión.  Este proyecto surge del deseo profundo de compartir, aprender y crecer, no desde la imposición, sino desde la apertura y el diálogo. Porque hablar de YHWH es hablar de vida, de propósito y de identidad.', 'Somos una comunidad de buscadores, aprendices y servidores que anhelan conocer más al Eterno y caminar conforme a Su voluntad.\r\nNo somos una institución ni una denominación: somos un espacio de estudio, reflexión y encuentro, donde cada persona puede acercarse a la Escritura desde la autenticidad y el respeto.\r\n\r\nCreemos en una fe viva, consciente y fundamentada.\r\nCreemos en la importancia de volver a las raíces, al significado profundo del Nombre y a la esencia del mensaje divino.\r\nY creemos que cada conversación sincera sobre YHWH tiene el poder de despertar, sanar y transformar.', '', '2026-05-15 00:01:37');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `home_section_calendario`
+--
+
+CREATE TABLE `home_section_calendario` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `home_section_calendario`
+--
+
+INSERT INTO `home_section_calendario` (`id`, `title`, `subtitle`, `content`, `image_url`, `updated_at`) VALUES
+(1, 'Calendario Lunisolar', 'Sigue los tiempos señalados', 'Información sobre el calendario...', NULL, '2026-05-14 00:29:38');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `home_section_contactos`
+--
+
+CREATE TABLE `home_section_contactos` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `home_section_equipo`
+--
+
+CREATE TABLE `home_section_equipo` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `home_section_footer`
+--
+
+CREATE TABLE `home_section_footer` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `home_section_footer`
+--
+
+INSERT INTO `home_section_footer` (`id`, `title`, `subtitle`, `content`, `image_url`, `updated_at`) VALUES
+(1, 'Hablemos de YHWH', 'Nuestro objetivo es el estudio de las raÝces hebreas.', 'Estudio profundo de las escrituras.', NULL, '2026-05-14 00:29:38');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `home_section_hero`
+--
+
+CREATE TABLE `home_section_hero` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `home_section_hero`
+--
+
+INSERT INTO `home_section_hero` (`id`, `title`, `subtitle`, `content`, `image_url`, `updated_at`) VALUES
+(1, 'Hablemos de YHWH', 'Descubre las raíces hebreas de tu fe', 'Contenido descriptivo aquí...', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&q=80&w=1920', '2026-05-14 00:27:44');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `home_section_parashot`
+--
+
+CREATE TABLE `home_section_parashot` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `home_section_testimonio`
+--
+
+CREATE TABLE `home_section_testimonio` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` text DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -301,8 +475,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `role`, `created_at`) VALUES
-(1, 'admin', '$2b$10$jfB8QtPjpbA6ivru7VWlEucDTao.RUZ8aqb06KsCWnRLhQceoL7EG', NULL, 'admin', '2026-02-18 11:47:23'),
-(2, 'editor', '$2b$10$jfB8QtPjpbA6ivru7VWlEucDTao.RUZ8aqb06KsCWnRLhQceoL7EG', NULL, 'editor', '2026-02-18 11:47:23');
+(1, 'admin', '$2b$10$7x1CF15qmQLjAkZX3bLvGe4ESb9wFsxb2S4QARE8Y1BYbwX1RWl/.', NULL, 'admin', '2026-02-18 11:47:23'),
+(2, 'editor', '$2b$10$7x1CF15qmQLjAkZX3bLvGe4ESb9wFsxb2S4QARE8Y1BYbwX1RWl/.', NULL, 'editor', '2026-02-18 11:47:23');
 
 --
 -- Índices para tablas volcadas
@@ -319,6 +493,54 @@ ALTER TABLE `dynamic_sections`
 -- Indices de la tabla `footer_links`
 --
 ALTER TABLE `footer_links`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `home_section_about`
+--
+ALTER TABLE `home_section_about`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `home_section_calendario`
+--
+ALTER TABLE `home_section_calendario`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `home_section_contactos`
+--
+ALTER TABLE `home_section_contactos`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `home_section_equipo`
+--
+ALTER TABLE `home_section_equipo`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `home_section_footer`
+--
+ALTER TABLE `home_section_footer`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `home_section_hero`
+--
+ALTER TABLE `home_section_hero`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `home_section_parashot`
+--
+ALTER TABLE `home_section_parashot`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `home_section_testimonio`
+--
+ALTER TABLE `home_section_testimonio`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -387,13 +609,61 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `dynamic_sections`
 --
 ALTER TABLE `dynamic_sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `footer_links`
 --
 ALTER TABLE `footer_links`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+
+--
+-- AUTO_INCREMENT de la tabla `home_section_about`
+--
+ALTER TABLE `home_section_about`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `home_section_calendario`
+--
+ALTER TABLE `home_section_calendario`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `home_section_contactos`
+--
+ALTER TABLE `home_section_contactos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `home_section_equipo`
+--
+ALTER TABLE `home_section_equipo`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `home_section_footer`
+--
+ALTER TABLE `home_section_footer`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `home_section_hero`
+--
+ALTER TABLE `home_section_hero`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `home_section_parashot`
+--
+ALTER TABLE `home_section_parashot`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `home_section_testimonio`
+--
+ALTER TABLE `home_section_testimonio`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `parashot`
@@ -417,13 +687,13 @@ ALTER TABLE `pricing`
 -- AUTO_INCREMENT de la tabla `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT de la tabla `site_settings`
 --
 ALTER TABLE `site_settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=156;
 
 --
 -- AUTO_INCREMENT de la tabla `team`
@@ -441,7 +711,7 @@ ALTER TABLE `testimonials`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- Restricciones para tablas volcadas
