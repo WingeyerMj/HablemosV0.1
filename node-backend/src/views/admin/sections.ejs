@@ -1,0 +1,91 @@
+<!-- Sidebar -->
+<nav class="col-md-2 d-md-block sidebar">
+    <div class="brand">
+        <img src="/assets/img/pagina/logo.svg" alt="Logo" class="img-fluid" style="max-height: 50px; border-radius: 50%;">
+        <h5>Admin Panel</h5>
+    </div>
+    
+    <a href="/" target="_blank"><i class="bi bi-globe"></i> Ver mi Web</a>
+    <a href="/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    
+    <div class="nav-label">Contenido</div>
+    <a href="/admin/dynamic-sections"><i class="bi bi-puzzle"></i> Mis Secciones</a>
+    <a href="/admin/sections" class="active"><i class="bi bi-layout-text-window-reverse"></i> Secciones Home</a>
+    
+    <% if (role === 'admin') { %>
+        <div class="nav-label">Administración</div>
+        <a href="/admin/settings"><i class="bi bi-gear"></i> Configuración</a>
+        <a href="/admin/users"><i class="bi bi-people"></i> Usuarios</a>
+    <% } %>
+    
+    <div class="mt-auto">
+        <hr style="border-color: rgba(255,255,255,0.1);">
+        <a href="/admin/logout" class="text-danger"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="col-md-10 main-content">
+    <div class="page-header mb-4">
+        <h1><i class="bi bi-layout-text-window-reverse me-2"></i>Secciones del Home</h1>
+        <p class="text-white-50">Gestiona el contenido de las secciones dinámicas que están vinculadas a tablas específicas.</p>
+    </div>
+
+    <% if (Object.keys(sections).length === 0) { %>
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i> No se encontraron secciones dinámicas con tablas de contenido vinculadas.
+        </div>
+    <% } %>
+
+    <div class="row">
+        <% Object.keys(sections).forEach(slug => { %>
+            <div class="col-md-6 mb-4">
+                <div class="card bg-dark border-secondary h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center" style="background: rgba(212,184,149,0.05); border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <h5 class="mb-0" style="color: var(--primary-color);">
+                            <i class="bi bi-pencil-square me-2"></i><%= sections[slug].display_name %>
+                        </h5>
+                        <span class="badge bg-secondary opacity-75 small">Tabla: <%= sections[slug].table_name %></span>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/sections/update" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="table_name" value="<%= sections[slug].table_name %>">
+                            <input type="hidden" name="image_url" value="<%= sections[slug].image_url %>">
+                            
+                            <div class="mb-3">
+                                <label class="form-label small text-white-50">Título en Web</label>
+                                <input type="text" name="title" class="form-control bg-dark text-white border-secondary" value="<%= sections[slug].title %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small text-white-50">Subtítulo / Frase</label>
+                                <input type="text" name="subtitle" class="form-control bg-dark text-white border-secondary" value="<%= sections[slug].subtitle %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small text-white-50">Contenido Principal</label>
+                                <textarea name="content" class="form-control bg-dark text-white border-secondary" rows="4"><%= sections[slug].content %></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small text-white-50">Imagen de la Sección</label>
+                                <% if (sections[slug].image_url) { %>
+                                    <div class="mb-2">
+                                        <img src="<%= sections[slug].image_url %>" alt="Preview" class="img-thumbnail bg-black border-secondary" style="max-height: 120px;">
+                                    </div>
+                                <% } %>
+                                <input type="file" name="image_file" class="form-control bg-dark text-white border-secondary">
+                            </div>
+
+                            <div class="text-end border-top border-secondary pt-3 mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</main>
