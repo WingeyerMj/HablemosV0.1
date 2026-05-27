@@ -37,7 +37,6 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/', (req, res) => res.redirect('/admin/dashboard'));
 router.get('/login', adminController.loginPage);
 router.post('/login', adminController.login);
 router.get('/logout', adminController.logout);
@@ -99,7 +98,9 @@ router.get('/dynamic-sections/toggle/:id', isAuthenticated, adminController.togg
 
 // Entidades Dinámicas (Tablas creadas por el usuario)
 router.get('/entity/:table', isAuthenticated, adminController.manageEntity);
-router.post('/entity/:table/add', isAuthenticated, adminController.addEntityData);
+router.post('/entity/:table/add', isAuthenticated, upload.single('image_file'), adminController.addEntityData);
+router.get('/entity/:table/edit/:id', isAuthenticated, adminController.editEntityData);
+router.post('/entity/:table/update/:id', isAuthenticated, upload.single('image_file'), adminController.updateEntityData);
 router.get('/entity/:table/delete/:id', isAuthenticated, adminController.deleteEntityData);
 
 module.exports = router;

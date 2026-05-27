@@ -47,6 +47,13 @@ const adminController = {
                 team = await Team.getAll();
                 testimonials = await Testimonial.getAll();
                 pricing = await Pricing.getAll();
+                const sectionNames = ['hero', 'calendario', 'about', 'parashot', 'eventos', 'equipo', 'footer'];
+                for (const name of sectionNames) {
+                    const [rows] = await db.query(`SELECT * FROM home_section_${name} LIMIT 1`);
+                    if (rows.length > 0) {
+                        sections.push({ ...rows[0], section_name: name });
+                    }
+                }
             } catch (dbErr) {
                 console.warn('⚠️ No se pudieron cargar datos del dashboard:', dbErr.message);
             }
@@ -264,63 +271,21 @@ const adminController = {
         res.redirect('/admin/dashboard#pricing');
     },
 
-    // ==================== SECCIONES HOME ====================
+    // ==================== SECCIONES DEL HOME (Hero, About, etc.) ====================
     sectionsPage: async (req, res) => {
         try {
-            // 1. Definir las secciones base que deben ser dinámicas
-            const baseSections = [
-                { slug: 'hero', title: 'Hero' },
-                { slug: 'about', title: 'Sobre Nosotros' },
-                { slug: 'calendario', title: 'Calendario' },
-                { slug: 'parashot', title: 'Parashot' },
-                { slug: 'testimonio', title: 'Testimonios' },
-                { slug: 'equipo', title: 'Equipo' },
-                { slug: 'contactos', title: 'Contacto' },
-                { slug: 'footer', title: 'Footer' }
-            ];
-
-            // 2. Asegurar que existan en dynamic_sections y tengan su tabla
-            for (const bs of baseSections) {
-                const [exists] = await db.query('SELECT id FROM dynamic_sections WHERE slug = ?', [bs.slug]);
-                if (exists.length === 0) {
-                    await db.query('INSERT INTO dynamic_sections (title, slug, section_type, is_active) VALUES (?, ?, ?, ?)',
-                        [bs.title, bs.slug, 'inline', 1]);
-                }
-                
-                const tableName = `home_section_${bs.slug}`;
-                await db.query(`CREATE TABLE IF NOT EXISTS ${tableName} (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    title VARCHAR(255),
-                    subtitle TEXT,
-                    content TEXT,
-                    image_url VARCHAR(255),
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                )`);
-            }
-
-            // 3. Obtener todas las secciones activas para el panel de edición
-            const [dynamicSections] = await db.query('SELECT * FROM dynamic_sections WHERE is_active = 1 ORDER BY nav_order ASC');
-            
-            const sections = {};
-            for (const ds of dynamicSections) {
-                const slug = ds.slug.toLowerCase().trim();
-                const tableName = ds.data_table || `home_section_${slug}`;
-                
-                try {
-                    const [rows] = await db.query(`SELECT * FROM ${tableName} ORDER BY id ASC LIMIT 1`);
-                    sections[slug] = {
-                        title: rows[0] ? rows[0].title : ds.title,
-                        subtitle: rows[0] ? rows[0].subtitle : (ds.summary || ''),
-                        content: rows[0] ? rows[0].content : (ds.content || ''),
-                        image_url: rows[0] ? rows[0].image_url : (ds.image_url || ''),
-                        display_name: ds.title,
-                        table_name: tableName
-                    };
-                } catch (err) {
-                    console.warn(`Tabla ${tableName} no encontrada durante sectionsPage`);
+            const sectionNames = ['hero', 'calendario', 'about', 'parashot', 'eventos', 'equipo', 'footer'];
+            const sections = [];
+            for (const name of sectionNames) {
+                const [rows] = await db.query(`SELECT * FROM home_section_${name} LIMIT 1`);
+                if (rows.length > 0) {
+                    sections.push({
+                        ...rows[0],
+                        section_name: name,
+                        tableName: `home_section_${name}`
+                    });
                 }
             }
-
             res.render('admin/sections', { layout: 'admin/layout', sections });
         } catch (error) {
             console.error('Error sectionsPage:', error);
@@ -330,23 +295,18 @@ const adminController = {
 
     updateSection: async (req, res) => {
         try {
-            const { table_name, title, subtitle, content } = req.body;
-            let { image_url } = req.body;
-
+            const { id, tableName, title, subtitle, content, image_url } = req.body;
+            let finalImageUrl = image_url;
             if (req.file) {
-                image_url = '/uploads/sections/' + req.file.filename;
+                finalImageUrl = '/uploads/general/' + req.file.filename;
             }
+            
+            if (!tableName) throw new Error('Nombre de tabla no especificado');
 
-            // Verificar si existe el registro en la tabla específica
-            const [rows] = await db.query(`SELECT id FROM ${table_name} LIMIT 1`);
-            if (rows.length > 0) {
-                await db.query(`UPDATE ${table_name} SET title = ?, subtitle = ?, content = ?, image_url = ? WHERE id = ?`, 
-                    [title, subtitle, content, image_url || '', rows[0].id]);
-            } else {
-                await db.query(`INSERT INTO ${table_name} (title, subtitle, content, image_url) VALUES (?, ?, ?, ?)`, 
-                    [title, subtitle, content, image_url || '']);
-            }
-
+            await db.query(
+                `UPDATE ${tableName} SET title = ?, subtitle = ?, content = ?, image_url = ? WHERE id = ?`,
+                [title, subtitle, content, finalImageUrl, id]
+            );
             res.redirect('/admin/sections');
         } catch (error) {
             console.error('Error updateSection:', error);
@@ -354,15 +314,10 @@ const adminController = {
         }
     },
 
-    // ==================== CONFIGURACIÓN ====================
+    // ==================== CONFIGURACIÓN DEL SITIO ====================
     settingsPage: async (req, res) => {
         try {
-            const [rows] = await db.query('SELECT * FROM site_settings ORDER BY setting_group, id');
-            const settingsGrouped = {};
-            rows.forEach(s => {
-                if (!settingsGrouped[s.setting_group]) settingsGrouped[s.setting_group] = [];
-                settingsGrouped[s.setting_group].push(s);
-            });
+            const settingsGrouped = await SiteSettings.getAllGrouped();
             res.render('admin/settings', { layout: 'admin/layout', settingsGrouped });
         } catch (error) {
             console.error('Error settingsPage:', error);
@@ -372,10 +327,9 @@ const adminController = {
 
     updateSettings: async (req, res) => {
         try {
-            const settings = req.body;
-            for (const key in settings) {
-                await db.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [settings[key], key]);
-            }
+            const data = req.body;
+            // data viene como { setting_key: value, ... }
+            await SiteSettings.setMultiple(data);
             res.redirect('/admin/settings');
         } catch (error) {
             console.error('Error updateSettings:', error);
@@ -383,6 +337,7 @@ const adminController = {
         }
     },
 
+    // ==================== SESIÓN ====================
     logout: (req, res) => {
         req.session.destroy();
         res.redirect('/admin/login');
@@ -437,7 +392,7 @@ const adminController = {
 
             res.render('admin/dynamic_sections', {
                 layout: 'admin/layout',
-                dynamicSections: dynamicSections.filter(ds => !['hero', 'about', 'calendario', 'parashot', 'testimonio', 'equipo', 'contactos', 'footer'].includes(ds.slug))
+                dynamicSections
             });
         } catch (error) {
             next(error);
@@ -460,9 +415,11 @@ const adminController = {
             const { title, section_type, summary, content, icon, image_url, nav_order, show_in_navbar, allowed_editors, has_table, field_names, field_types } = req.body;
             const slug = DynamicSection.generateSlug(title);
 
+            // Forzamos la creación de una tabla para cada nueva sección
             let data_table = null;
-            if (has_table === 'on' && field_names) {
-                const fields = [];
+            const fields = [];
+            
+            if (field_names) {
                 const names = Array.isArray(field_names) ? field_names : [field_names];
                 const types = Array.isArray(field_types) ? field_types : [field_types];
 
@@ -471,11 +428,20 @@ const adminController = {
                         fields.push({ name: name.trim(), type: types[i] });
                     }
                 });
-
-                if (fields.length > 0) {
-                    data_table = await EntityModel.createDynamicTable(slug, fields);
-                }
             }
+
+            // Si no hay campos definidos, agregamos unos por defecto para que la sección sea funcional de inmediato
+            if (fields.length === 0) {
+                fields.push({ name: 'titulo', type: 'string' });
+                fields.push({ name: 'subtitulo', type: 'string' });
+                fields.push({ name: 'descripcion', type: 'text' });
+                fields.push({ name: 'contenido', type: 'text' });
+                fields.push({ name: 'video_url', type: 'string' });
+                fields.push({ name: 'imagen_url', type: 'string' });
+            }
+
+            // Crear la tabla siempre
+            data_table = await EntityModel.createDynamicTable(slug, fields);
 
             const result = await DynamicSection.create({
                 title,
@@ -613,9 +579,67 @@ const adminController = {
     },
 
     addEntityData: async (req, res) => {
-        const tableName = req.params.table;
-        await EntityModel.insert(tableName, req.body);
-        res.redirect(`/admin/entity/${tableName}`);
+        try {
+            const tableName = req.params.table;
+            const data = { ...req.body };
+            
+            if (req.file) {
+                const columns = await EntityModel.getColumns(tableName);
+                const imgCol = columns.find(c => c.Field.includes('imagen') || c.Field.includes('image') || c.Field.includes('img') || c.Field.includes('url'));
+                if (imgCol) {
+                    data[imgCol.Field] = '/uploads/entity/' + req.file.filename;
+                }
+            }
+            
+            await EntityModel.insert(tableName, data);
+            res.redirect(`/admin/entity/${tableName}`);
+        } catch (error) {
+            console.error('Error addEntityData:', error);
+            res.redirect(`/admin/entity/${req.params.table}`);
+        }
+    },
+
+    editEntityData: async (req, res) => {
+        try {
+            const { table, id } = req.params;
+            const columns = await EntityModel.getColumns(table);
+            const data = await EntityModel.getById(table, id);
+            const [rows] = await db.query('SELECT title FROM dynamic_sections WHERE data_table = ?', [table]);
+
+            if (!data) return res.redirect(`/admin/entity/${table}`);
+
+            res.render('admin/edit_entity', {
+                layout: 'admin/layout',
+                tableName: table,
+                columns,
+                data,
+                title: rows[0] ? rows[0].title : table
+            });
+        } catch (error) {
+            console.error('Error editEntityData:', error);
+            res.redirect(`/admin/dynamic-sections`);
+        }
+    },
+
+    updateEntityData: async (req, res) => {
+        try {
+            const { table, id } = req.params;
+            const data = { ...req.body };
+            
+            if (req.file) {
+                const columns = await EntityModel.getColumns(table);
+                const imgCol = columns.find(c => c.Field.includes('imagen') || c.Field.includes('image') || c.Field.includes('img') || c.Field.includes('url'));
+                if (imgCol) {
+                    data[imgCol.Field] = '/uploads/entity/' + req.file.filename;
+                }
+            }
+
+            await EntityModel.update(table, id, data);
+            res.redirect(`/admin/entity/${table}`);
+        } catch (error) {
+            console.error('Error updateEntityData:', error);
+            res.redirect(`/admin/entity/${req.params.table}`);
+        }
     },
 
     deleteEntityData: async (req, res) => {

@@ -11,8 +11,30 @@ const db = require('../config/db');
 const homeController = {
     index: async (req, res, next) => {
         try {
-            let allDynamicSections = [], latestParashot = [], portfolio = [], team = [], testimonials = [], pricingRaw = [];
+            let allDynamicSections = [], latestParashot = [], portfolio = [], team = [], testimonials = [], pricingRaw = [], siteSettings = {};
+            const sectionsObj = {};
+
             try {
+                // 1. Cargar Secciones Base desde tablas individuales
+                const sectionNames = ['hero', 'calendario', 'about', 'parashot', 'eventos', 'equipo', 'footer'];
+                for (const name of sectionNames) {
+                    try {
+                        const tableName = `home_section_${name}`;
+                        const [rows] = await db.query(`SELECT * FROM ${tableName} LIMIT 1`);
+                        if (rows && rows.length > 0) {
+                            // Mapeo explícito para asegurar que la primera letra sea mayúscula (hero -> Hero)
+                            const key = name.charAt(0).toUpperCase() + name.slice(1);
+                            sectionsObj[key] = rows[0];
+                            console.log(`✅ Cargada sección base: ${key} desde ${tableName}`);
+                        } else {
+                            console.warn(`⚠️ La tabla ${tableName} está vacía.`);
+                        }
+                    } catch (e) {
+                        console.error(`❌ Error crítico cargando tabla home_section_${name}:`, e.message);
+                    }
+                }
+
+                // 2. Cargar otros datos dinámicos
                 allDynamicSections = await DynamicSection.getAll();
                 latestParashot = await Parasha.getLatest(6);
                 portfolio = await Portfolio.getPublished();
@@ -24,47 +46,36 @@ const homeController = {
                 console.warn('⚠️ No se pudieron cargar datos de la DB:', dbErr.message || dbErr);
             }
 
-            // 3. Procesar secciones dinámicas
+            // 3. Procesar secciones dinámicas y cargar sus datos
             const dynamicInline = [];
-            const sectionsObj = {};
+            const baseSlugs = ['hero', 'about', 'calendario', 'parashot', 'eventos', 'equipo', 'footer'];
+
             for (const ds of allDynamicSections) {
                 if (ds.is_active) {
                     const slug = ds.slug.toLowerCase().trim();
-                    // Normalizar la clave (ej: 'about' -> 'About')
                     const key = slug.charAt(0).toUpperCase() + slug.slice(1);
                     
-                    // Prioridad de datos:
-                    // 1. Tabla dedicada home_section_[slug] (para títulos/presentación)
-                    // 2. Campo data_table (para listas de datos)
-                    // 3. Datos base de dynamic_sections
-                    
-                    const homeTableName = `home_section_${slug}`;
-                    try {
-                        const [homeData] = await db.query(`SELECT * FROM ${homeTableName} LIMIT 1`);
-                        if (homeData && homeData.length > 0) {
-                            Object.assign(ds, homeData[0]);
-                        }
-                    } catch (e) {
-                        // Si no existe la tabla home_section_*, intentamos data_table
-                        if (ds.data_table) {
-                            try {
-                                const tableData = await EntityModel.getAll(ds.data_table);
-                                if (tableData && tableData.length > 0) {
-                                    Object.assign(ds, tableData[0]);
-                                }
-                            } catch (err) {
-                                console.warn(`Error al cargar datos de ${ds.data_table}:`, err.message);
-                            }
+                    // Cargar items si tiene tabla
+                    let items = [];
+                    if (ds.data_table) {
+                        try {
+                            items = await EntityModel.getAll(ds.data_table);
+                        } catch (e) {
+                            console.warn(`⚠️ Error cargando items de ${ds.data_table}:`, e.message);
                         }
                     }
+                    
+                    const sectionData = { ...ds, items };
 
-                    sectionsObj[key] = ds;
+                    // Solo agregamos a sectionsObj si NO es una sección base 
+                    // o si la sección base no pudo cargarse previamente.
+                    if (!baseSlugs.includes(slug) || !sectionsObj[key]) {
+                        sectionsObj[key] = sectionData;
+                    }
 
                     if (ds.section_type === 'inline') {
-                        // Excluimos las secciones fijas de la lista de dinámicas extras
-                        const excludedSlugs = ['hero', 'about', 'calendario', 'parashot', 'eventos', 'equipo', 'testimonio', 'contactos', 'footer'];
-                        if (!excludedSlugs.includes(slug)) {
-                            dynamicInline.push(ds);
+                        if (!baseSlugs.includes(slug)) {
+                            dynamicInline.push(sectionData);
                         }
                     }
                 }
